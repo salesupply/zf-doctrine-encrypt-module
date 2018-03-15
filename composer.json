@@ -3,7 +3,6 @@
   "description": "Provides property encryption for Doctrine Entities when used within Zend Framework 3.",
   "keywords": ["zf3", "doctrine2", "encrypt", "module", "zend framework 3", "encryption"],
   "homepage": "https://www.salesupply.com/",
-  "time": "2018-03-14",
   "license" : "MIT",
   "authors": [
     {
@@ -16,8 +15,9 @@
     "email": "development@salesupply.com"
   },
   "require": {
-    "php": "^7.1",
-    "51systems/doctrine-encrypt":"^6"
+    "php": "^7.2",
+    "51systems/doctrine-encrypt":"^6",
+    "doctrine/doctrine-orm-module":"^1.1"
   },
   "autoload": {
     "psr-4": {

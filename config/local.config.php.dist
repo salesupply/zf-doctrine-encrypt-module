@@ -1,0 +1,14 @@
+<?php
+
+namespace ZfDoctrineEncryptModule;
+
+return [
+    'doctrine' => [
+        'encryption' => [
+            'orm_default' => [
+                'key' => '',    // Must be 32 characters - Halite requirement
+                'salt' => '',   // Must be 32 characters - Halite requirement
+            ],
+        ],
+    ],
+];
