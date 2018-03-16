@@ -20,6 +20,11 @@ class HaliteAdapterFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        if (!is_array($options) || empty($options)) {
+
+            throw new OptionsNotFoundException('Options required to be set in the config for HaliteAdapter are "key" and "salt".');
+        }
+
         if (!key_exists('key', $options) && !is_string($options['key'])) {
 
             throw new OptionsNotFoundException('Option "key" is required.');
