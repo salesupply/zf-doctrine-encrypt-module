@@ -67,16 +67,17 @@ class ZfDoctrineEncryptedServiceFactory extends AbstractFactory
     }
 
     /**
-     * @param string $reader
      * @param ContainerInterface $container
+     * @param string $reader
+     * @param array|null $options
      * @return Reader
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    private function createReader(ContainerInterface $container, string $reader)
+    private function createReader(ContainerInterface $container, string $reader, array $options = null)
     {
         /** @var Reader $reader */
-        $reader = $this->hydrateDefinition($reader, $container);
+        $reader = $this->hydrateDefinition($reader, $container, $options);
 
         if (!$reader instanceof Reader) {
 
