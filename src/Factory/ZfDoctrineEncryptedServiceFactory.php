@@ -5,12 +5,12 @@ namespace ZfDoctrineEncryptModule\Factory;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
 use DoctrineEncrypt\Encryptors\EncryptorInterface;
-use DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber;
 use DoctrineModule\Service\AbstractFactory;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZfDoctrineEncryptModule\Adapter\HaliteAdapter;
 use ZfDoctrineEncryptModule\Options\ModuleOptions;
+use ZfDoctrineEncryptModule\Subscriber\DoctrineEncryptSubscriber;
 
 class ZfDoctrineEncryptedServiceFactory extends AbstractFactory
 {
