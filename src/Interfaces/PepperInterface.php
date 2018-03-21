@@ -10,8 +10,8 @@ interface PepperInterface
     public function getPepper(): string;
 
     /**
-     * @param string $salt
+     * @param string $pepper
      * @return PepperInterface
      */
-    public function setPepper(string $salt): PepperInterface;
+    public function setPepper(string $pepper): PepperInterface;
 }
