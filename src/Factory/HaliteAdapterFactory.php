@@ -15,8 +15,8 @@ class HaliteAdapterFactory implements FactoryInterface
      * @param array|null $options
      * @return object|HaliteAdapter
      * @throws OptionsNotFoundException
-     * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
      * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @throws \TypeError
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

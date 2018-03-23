@@ -3,11 +3,11 @@
 namespace ZfDoctrineEncryptModule\Adapter;
 
 use DoctrineEncrypt\Encryptors\EncryptorInterface;
+use ParagonIE\ConstantTime\Binary;
 use ParagonIE\Halite\Alerts\InvalidKey;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Symmetric\EncryptionKey;
-use ParagonIE\Halite\Util as CryptoUtil;
 
 class HaliteAdapter implements EncryptorInterface
 {
@@ -26,18 +26,18 @@ class HaliteAdapter implements EncryptorInterface
      * @param $key
      * @param $salt
      * @throws InvalidKey
-     * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
+     * @throws \TypeError
      */
     public function __construct($key, $salt)
     {
-        if (CryptoUtil::safeStrlen($key) !== \Sodium\CRYPTO_STREAM_KEYBYTES) {
+        if (Binary::safeStrlen($key) !== \Sodium\CRYPTO_STREAM_KEYBYTES) {
 
             throw new InvalidKey(
                 'Encryption key used for ' . __CLASS__ . ' must be exactly ' . \Sodium\CRYPTO_STREAM_KEYBYTES . ' characters long'
             );
         }
 
-        if (CryptoUtil::safeStrlen($salt) !== \Sodium\CRYPTO_STREAM_KEYBYTES) {
+        if (Binary::safeStrlen($salt) !== \Sodium\CRYPTO_STREAM_KEYBYTES) {
 
             throw new InvalidKey(
                 'Salt used for ' . __CLASS__ . ' must be exactly ' . \Sodium\CRYPTO_STREAM_KEYBYTES . ' characters long'
