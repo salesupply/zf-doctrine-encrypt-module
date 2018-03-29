@@ -199,10 +199,12 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * Process (encrypt/decrypt) entities fields
      *
-     * @param object $entity Some doctrine entity
+     * @param $entity
      * @param EntityManager $em
      * @param bool $isEncryptOperation
      * @return bool
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws \Exception
      */
     private function processFields($entity, EntityManager $em, $isEncryptOperation = true): bool
     {
@@ -216,13 +218,36 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             $refProperty = $property['reflection'];
             /** @var Encrypted $annotationOptions */
             $annotationOptions = $property['options'];
+            /** @var boolean $nullable */
+            $nullable = $property['nullable'];
 
             $value = $refProperty->getValue($entity);
-            $value = $value === null ? '' : $value;
+            // If the value is 'null' && is nullable, don't do anything, just skip it.
+            if (is_null($value) && $nullable) {
+
+                continue;
+            }
 
             $value = $isEncryptOperation ?
                 $this->encrypt($entity, $value, $annotationOptions) :
                 $this->decrypt($entity, $value, $annotationOptions);
+
+            $type = $annotationOptions->getType();
+
+            // If NOT encrypting, type know to PHP and the value does not match the type. Else error
+            if (
+                !$isEncryptOperation
+                // We're going to try a cast using settype. Array of types defined at: https://php.net/settype
+                && in_array($type, ['boolean', 'bool', 'integer', 'int', 'float', 'double', 'string', 'array', 'object', 'null'])
+                && gettype($value) !== $type
+            ) {
+                settype($value, $type);
+            } else {
+
+                throw new \Exception(
+                    'Could not convert encrypted value back to mapped value in ' . __CLASS__ . '::' . __FUNCTION__ . PHP_EOL
+                );
+            }
 
             $refProperty->setValue($entity, $value);
 
@@ -394,7 +419,8 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * @param object $entity
      * @param EntityManager $em
-     * @return array|mixed|\ReflectionProperty[]
+     * @return array|mixed
+     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     private function getEncryptedFields(object $entity, EntityManager $em)
     {
@@ -419,6 +445,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
                 $encryptedFields[] = [
                     'reflection' => $refProperty,
                     'options' => $annotationOptions,
+                    'nullable' => $meta->getFieldMapping($refProperty->getName())['nullable'],
                 ];
             }
         }
