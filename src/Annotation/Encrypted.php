@@ -31,6 +31,11 @@ class Encrypted
     public $pepper;
 
     /**
+     * @var string type that the encrypted/decrypted string should be
+     */
+    public $type = 'string';
+
+    /**
      * @return string
      */
     public function getSpices(): ?string
@@ -81,6 +86,24 @@ class Encrypted
     public function setPepper(?string $pepper): Encrypted
     {
         $this->pepper = $pepper;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param null|string $type
+     * @return Encrypted
+     */
+    public function setType(string $type): Encrypted
+    {
+        $this->type = $type;
         return $this;
     }
 
