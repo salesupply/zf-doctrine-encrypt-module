@@ -1,4 +1,4 @@
-# zf-doctrine-encrypt-module
+# Zend Framework & Doctrine Encrypt Module
 
 Expands [51systems](https://github.com/51systems/doctrine-encrypt/) Doctrine encrypt repository. 
 
