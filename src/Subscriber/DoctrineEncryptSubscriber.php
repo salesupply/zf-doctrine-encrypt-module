@@ -236,17 +236,17 @@ class DoctrineEncryptSubscriber implements EventSubscriber
 
             // If NOT encrypting, type know to PHP and the value does not match the type. Else error
             if (
-                !$isEncryptOperation
+                $isEncryptOperation === false
                 // We're going to try a cast using settype. Array of types defined at: https://php.net/settype
                 && in_array($type, ['boolean', 'bool', 'integer', 'int', 'float', 'double', 'string', 'array', 'object', 'null'])
                 && gettype($value) !== $type
             ) {
-                settype($value, $type);
-            } else {
+                if (settype($value, $type) === false) {
 
-                throw new \Exception(
-                    'Could not convert encrypted value back to mapped value in ' . __CLASS__ . '::' . __FUNCTION__ . PHP_EOL
-                );
+                    throw new \Exception(
+                        'Could not convert encrypted value back to mapped value in ' . __CLASS__ . '::' . __FUNCTION__ . PHP_EOL
+                    );
+                }
             }
 
             $refProperty->setValue($entity, $value);
