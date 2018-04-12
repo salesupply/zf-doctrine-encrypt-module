@@ -10,11 +10,7 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use DoctrineEncrypt\Encryptors\EncryptorInterface;
-use ParagonIE\Halite\Symmetric\EncryptionKey;
 use ZfDoctrineEncryptModule\Annotation\Encrypted;
-use ZfDoctrineEncryptModule\Interfaces\PepperInterface;
-use ZfDoctrineEncryptModule\Interfaces\SaltInterface;
-use ZfDoctrineEncryptModule\Interfaces\SpicyInterface;
 
 class DoctrineEncryptSubscriber implements EventSubscriber
 {
@@ -26,7 +22,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * Encrypted annotation full name
      */
-    const ENCRYPTED_ANN_NAME = Encrypted::class;
+    const ENCRYPTED_ANNOTATION_NAME = Encrypted::class;
 
     /**
      * Encryptor
@@ -80,6 +76,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * every time (Because it is going to differ from the un-encrypted value)
      *
      * @param OnFlushEventArgs $args
+     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     public function onFlush(OnFlushEventArgs $args)
     {
@@ -103,19 +100,23 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * Processes the entity for an onFlush event.
      *
-     * @param object $entity
+     * @param \object $entity
      * @param EntityManager $em
+     * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function entityOnFlush($entity, EntityManager $em)
+    private function entityOnFlush(object $entity, EntityManager $em)
     {
         $objId = spl_object_hash($entity);
 
         $fields = [];
 
         foreach ($this->getEncryptedFields($entity, $em) as $field) {
-            $fields[$field['reflection']->getName()] = [
-                'field' => $field['reflection'],
-                'value' => $field['reflection']->getValue($entity),
+            /** @var \ReflectionProperty $reflectionProperty */
+            $reflectionProperty = $field['reflection'];
+
+            $fields[$reflectionProperty->getName()] = [
+                'field' => $reflectionProperty,
+                'value' => $reflectionProperty->getValue($entity),
                 'options' => $field['options'],
             ];
         }
@@ -162,6 +163,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * which have @Encrypted annotations
      *
      * @param LifecycleEventArgs $args
+     * @throws \Doctrine\ORM\Mapping\MappingException
      */
     public function postLoad(LifecycleEventArgs $args)
     {
@@ -228,9 +230,9 @@ class DoctrineEncryptSubscriber implements EventSubscriber
                 continue;
             }
 
-            $value = $isEncryptOperation ?
-                $this->encrypt($entity, $value, $annotationOptions) :
-                $this->decrypt($entity, $value, $annotationOptions);
+            $value = $isEncryptOperation
+                ? $this->getEncryptor()->encrypt($value)
+                : $this->getEncryptor()->decrypt($value);
 
             $type = $annotationOptions->getType();
 
@@ -260,145 +262,10 @@ class DoctrineEncryptSubscriber implements EventSubscriber
         return ! empty($properties);
     }
 
-    private function encrypt($entity, $value, Encrypted $options)
-    {
-        // Check if option 'spices' is set. If so, expect a related Entity on $entity for get{$options->getSpices()}()
-        // Use related Entity to get Salt & Pepper. getSalt() and getPepper() should exist due to implementation of SpicyInterface
-        if (
-            !is_null($options->getSpices())
-            && method_exists($entity, 'get' . ucfirst($options->getSpices()))
-            && $entity->{'get' . ucfirst($options->getSpices())}() instanceof SpicyInterface
-            && ($salt = $entity->{'get' . ucfirst($options->getSpices())}()->getSalt())
-            && ($pepper = $entity->{'get' . ucfirst($options->getSpices())}()->getPepper())
-        ) {
-
-            return $this->getEncryptor()->encrypt($salt . $value . $pepper);
-        }
-
-        // Check if option 'salt' is set and 'spices' and 'pepper' options are not set.
-        // If so, expect a related Entity on $entity for get{$options->getSalt()}()
-        // Use related Entity to get Salt. getSalt() should exist due to implementation of SaltInterface
-        if (
-            is_null($options->getSpices())
-            && is_null($options->getPepper())
-            && !is_null($options->getSalt())
-            && method_exists($entity, 'get' . ucfirst($options->getSalt()))
-            && $entity->{'get' . ucfirst($options->getSalt())}() instanceof SaltInterface
-            && ($salt = $entity->{'get' . ucfirst($options->getSalt())}()->getSalt())
-        ) {
-
-            return $this->getEncryptor()->encrypt($salt . $value);
-        }
-
-        // Check if option 'pepper' is set and 'spices' && salt options are not set.
-        // If so, expect a related Entity on $entity for get{$options->getPepper()}()
-        // Use related Entity to get Salt. getPepper() should exist due to implementation of PepperInterface
-        if (
-            is_null($options->getSpices())
-            && is_null($options->getSalt())
-            && !is_null($options->getPepper())
-            && method_exists($entity, 'get' . ucfirst($options->getPepper()))
-            && $entity->{'get' . ucfirst($options->getPepper())}() instanceof PepperInterface
-            && ($pepper = $entity->{'get' . ucfirst($options->getPepper())}()->getPepper())
-        ) {
-
-            return $this->getEncryptor()->encrypt($value . $pepper);
-        }
-
-        // Check if options 'salt' and 'pepper' are set and 'spices' is not set.
-        // If so, expect a related Entity on $entity for get{$options->getPepper()}()
-        // Use related Entity to get Salt. getPepper() should exist due to implementation of PepperInterface
-        if (
-            is_null($options->getSpices())
-            && !is_null($options->getSalt())
-            && !is_null($options->getPepper())
-            && method_exists($entity, 'get' . ucfirst($options->getSalt()))
-            && method_exists($entity, 'get' . ucfirst($options->getPepper()))
-            && $entity->{'get' . ucfirst($options->getSalt())}() instanceof SaltInterface
-            && $entity->{'get' . ucfirst($options->getPepper())}() instanceof PepperInterface
-            && ($salt = $entity->{'get' . ucfirst($options->getSalt())}()->getSalt())
-            && ($pepper = $entity->{'get' . ucfirst($options->getPepper())}()->getPepper())
-        ) {
-
-            return $this->getEncryptor()->encrypt($salt . $value . $pepper);
-        }
-
-        return $this->getEncryptor()->encrypt($value);
-    }
-
-    private function decrypt($entity, $value, Encrypted $options)
-    {
-        $decrypted = $this->getEncryptor()->decrypt($value);
-
-        // Check if option 'spices' is set.
-        // If so, expect a related Entity on $entity for get{$options->getSpices()}()
-        // Use related Entity to get Salt & Pepper. getSalt() and getPepper() should exist due to implementation of SpicyInterface
-        if (
-            !is_null($options->getSpices())
-            && method_exists($entity, 'get' . ucfirst($options->getSpices()))
-            && $entity->{'get' . ucfirst($options->getSpices())}() instanceof SpicyInterface
-            && ($salt = $entity->{'get' . ucfirst($options->getSpices())}()->getSalt())
-            && ($pepper = $entity->{'get' . ucfirst($options->getSpices())}()->getPepper())
-        ) {
-
-            return str_replace($pepper, '', str_replace($salt, '', $decrypted));
-        }
-
-        // Check if option 'salt' is set and 'spices' and 'pepper' options are not set.
-        // If so, expect a related Entity on $entity for get{$options->getSalt()}()
-        // Use related Entity to get Salt. getSalt() should exist due to implementation of SaltInterface
-        if (
-            is_null($options->getSpices())
-            && is_null($options->getPepper())
-            && !is_null($options->getSalt())
-            && method_exists($entity, 'get' . ucfirst($options->getSalt()))
-            && $entity->{'get' . ucfirst($options->getSalt())}() instanceof SaltInterface
-            && ($salt = $entity->{'get' . ucfirst($options->getSalt())}()->getSalt())
-        ) {
-
-            return str_replace($salt, '', $decrypted);
-        }
-
-        // Check if option 'pepper' is set and 'spices' && salt options are not set.
-        // If so, expect a related Entity on $entity for get{$options->getPepper()}()
-        // Use related Entity to get Salt. getPepper() should exist due to implementation of PepperInterface
-        if (
-            is_null($options->getSpices())
-            && is_null($options->getSalt())
-            && !is_null($options->getPepper())
-            && method_exists($entity, 'get' . ucfirst($options->getPepper()))
-            && $entity->{'get' . ucfirst($options->getPepper())}() instanceof PepperInterface
-            && ($pepper = $entity->{'get' . ucfirst($options->getPepper())}()->getPepper())
-        ) {
-
-            return str_replace($pepper, '', $decrypted);
-        }
-
-        // Check if options 'salt' and 'pepper' are set and 'spices' is not set.
-        // If so, expect a related Entity on $entity for get{$options->getPepper()}()
-        // Use related Entity to get Salt. getPepper() should exist due to implementation of PepperInterface
-        if (
-            is_null($options->getSpices())
-            && !is_null($options->getSalt())
-            && !is_null($options->getPepper())
-            && method_exists($entity, 'get' . ucfirst($options->getSalt()))
-            && method_exists($entity, 'get' . ucfirst($options->getPepper()))
-            && $entity->{'get' . ucfirst($options->getSalt())}() instanceof SaltInterface
-            && $entity->{'get' . ucfirst($options->getPepper())}() instanceof PepperInterface
-            && ($salt = $entity->{'get' . ucfirst($options->getSalt())}()->getSalt())
-            && ($pepper = $entity->{'get' . ucfirst($options->getPepper())}()->getPepper())
-        ) {
-
-            return str_replace($pepper, '', str_replace($salt, '', $decrypted));
-        }
-
-        return $decrypted;
-    }
-
     /**
      * Check if we have entity in decoded registry
      *
-     * @param object $entity Some doctrine entity
+     * @param \object $entity Some doctrine entity
      * @return bool
      */
     private function hasInDecodedRegistry($entity): bool
@@ -409,7 +276,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * Adds entity to decoded registry
      *
-     * @param object $entity Some doctrine entity
+     * @param \object $entity Some doctrine entity
      */
     private function addToDecodedRegistry($entity)
     {
@@ -417,7 +284,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
-     * @param object $entity
+     * @param \object $entity
      * @param EntityManager $em
      * @return array|mixed
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -438,7 +305,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             /** @var \ReflectionProperty $refProperty */
 
             // Gets Encrypted object from property Annotation. Includes options and their values.
-            $annotationOptions = $this->reader->getPropertyAnnotation($refProperty, $this::ENCRYPTED_ANN_NAME) ?: [];
+            $annotationOptions = $this->reader->getPropertyAnnotation($refProperty, $this::ENCRYPTED_ANNOTATION_NAME) ?: [];
 
             if (!empty($annotationOptions)) {
                 $refProperty->setAccessible(true);
