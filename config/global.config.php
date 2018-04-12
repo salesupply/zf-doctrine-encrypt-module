@@ -3,8 +3,8 @@
 namespace ZfDoctrineEncryptModule;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use ZfDoctrineEncryptModule\Adapter\HaliteAdapter;
-use ZfDoctrineEncryptModule\Factory\HaliteAdapterFactory;
+use ZfDoctrineEncryptModule\Adapter\HaliteEncryptionAdapter;
+use ZfDoctrineEncryptModule\Factory\HaliteEncryptionAdapterFactory;
 use ZfDoctrineEncryptModule\Factory\ZfDoctrineEncryptedServiceFactory;
 
 return [
@@ -28,11 +28,11 @@ return [
     ],
     'service_manager' => [
         'aliases' => [
-            'encryption_adapter' => HaliteAdapter::class,
+            'encryption_adapter' => HaliteEncryptionAdapter::class,
         ],
         'factories' => [
             // Using aliases so someone else can use own adapter/factory
-            HaliteAdapter::class => HaliteAdapterFactory::class
+            HaliteEncryptionAdapter::class => HaliteEncryptionAdapterFactory::class
         ],
     ],
 ];
