@@ -8,7 +8,7 @@ use DoctrineEncrypt\Encryptors\EncryptorInterface;
 use DoctrineModule\Service\AbstractFactory;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use ZfDoctrineEncryptModule\Adapter\HaliteAdapter;
+use ZfDoctrineEncryptModule\Adapter\HaliteEncryptionAdapter;
 use ZfDoctrineEncryptModule\Options\ModuleOptions;
 use ZfDoctrineEncryptModule\Subscriber\DoctrineEncryptSubscriber;
 
@@ -27,13 +27,12 @@ class ZfDoctrineEncryptedServiceFactory extends AbstractFactory
 
         /** @var Reader|AnnotationReader $reader */
         $reader = $this->createReader($container, $options->getReader());
-        /** @var EncryptorInterface|HaliteAdapter $adapter */
+        /** @var EncryptorInterface|HaliteEncryptionAdapter $adapter */
         $adapter = $this->createAdapter(
             $container,
             $options->getAdapter(),
             [
                 'key' => $options->getKey(),
-                'salt' => $options->getSalt(),
             ]
         );
 
