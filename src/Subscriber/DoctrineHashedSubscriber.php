@@ -91,7 +91,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
     {
         $fields = [];
 
-        foreach ($this->getEncryptedFields($entity, $em) as $field) {
+        foreach ($this->getHashableFields($entity, $em) as $field) {
             /** @var \ReflectionProperty $reflectionProperty */
             $reflectionProperty = $field['reflection'];
 
@@ -116,7 +116,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
     }
 
     /**
-     * Process (encrypt/decrypt) entities fields
+     * Process hashable entities fields
      *
      * @param $entity
      * @param EntityManager $em
@@ -126,7 +126,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
      */
     private function processFields($entity, EntityManager $em): bool
     {
-        $properties = $this->getEncryptedFields($entity, $em);
+        $properties = $this->getHashableFields($entity, $em);
 
         foreach ($properties as $property) {
             /** @var \ReflectionProperty $refProperty */
@@ -161,7 +161,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
      * @param \object $entity
      * @return string
      */
-    private function addSalt(string $value, Hashed $options, \object $entity)
+    private function addSalt(string $value, Hashed $options, object $entity)
     {
         if (
             !is_null($options->getSalt())
@@ -182,7 +182,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
      * @return array|mixed
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function getEncryptedFields(object $entity, EntityManager $em)
+    private function getHashableFields(object $entity, EntityManager $em)
     {
         $className = get_class($entity);
 
@@ -192,7 +192,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
 
         $meta = $em->getClassMetadata($className);
 
-        $encryptedFields = [];
+        $hashableFields = [];
 
         foreach ($meta->getReflectionProperties() as $refProperty) {
             /** @var \ReflectionProperty $refProperty */
@@ -202,7 +202,7 @@ class DoctrineHashedSubscriber implements EventSubscriber
 
             if (!empty($annotationOptions)) {
                 $refProperty->setAccessible(true);
-                $encryptedFields[] = [
+                $hashableFields[] = [
                     'reflection' => $refProperty,
                     'options' => $annotationOptions,
                     'nullable' => $meta->getFieldMapping($refProperty->getName())['nullable'],
@@ -210,9 +210,9 @@ class DoctrineHashedSubscriber implements EventSubscriber
             }
         }
 
-        $this->hashedFieldCache[$className] = $encryptedFields;
+        $this->hashedFieldCache[$className] = $hashableFields;
 
-        return $encryptedFields;
+        return $hashableFields;
     }
 
     /**

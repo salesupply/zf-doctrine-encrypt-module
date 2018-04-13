@@ -4,7 +4,6 @@ namespace ZfDoctrineEncryptModule\Factory;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\Reader;
-use DoctrineEncrypt\Encryptors\EncryptorInterface;
 use DoctrineModule\Service\AbstractFactory;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -94,19 +93,19 @@ class ZfDoctrineHashedServiceFactory extends AbstractFactory
      * @param ContainerInterface $container
      * @param $adapter
      * @param array|null $options
-     * @return EncryptorInterface
+     * @return HashInterface
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
     private function createAdapter(ContainerInterface $container, string $adapter, array $options = null)
     {
-        /** @var EncryptorInterface $adapter */
+        /** @var HashInterface $adapter */
         $adapter = $this->hydrateDefinition($adapter, $container, $options);
 
-        if (!$adapter instanceof EncryptorInterface) {
+        if (!$adapter instanceof HashInterface) {
             throw new \InvalidArgumentException(
                 'Invalid hashor provided, must be a service name, '
-                . 'class name, an instance, or method returning an ' . EncryptorInterface::class
+                . 'class name, an instance, or method returning an ' . HashInterface::class
             );
         }
 
