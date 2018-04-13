@@ -98,8 +98,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
 
 
     /**
-     * Processes the entity for an onFlush event.
-     *
      * @param \object $entity
      * @param EntityManager $em
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -177,9 +175,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSubscribedEvents(): array
     {
         return [
@@ -187,15 +182,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             Events::onFlush,
             Events::postFlush,
         ];
-    }
-
-    public static function capitalize(string $word): string
-    {
-        if (is_array($word)) {
-            $word = $word[0];
-        }
-
-        return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $word)));
     }
 
     /**
@@ -263,8 +249,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
-     * Check if we have entity in decoded registry
-     *
      * @param \object $entity Some doctrine entity
      * @return bool
      */
@@ -274,8 +258,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
-     * Adds entity to decoded registry
-     *
      * @param \object $entity Some doctrine entity
      */
     private function addToDecodedRegistry($entity)
