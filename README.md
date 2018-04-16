@@ -37,7 +37,9 @@ If these are filled in, it works out of the box using [Halite](https://github.co
 However, must be said, at the moment of writing this ReadMe, the Halite module contains duplicate `const` declarations,
 as such, you must disable your `E_NOTICE` warnings in your PHP config :(
 
-# Usage example
+# Examples
+
+### Encryption
 
 Simple, consider that you have an `Address` Entity, which under upcoming [EU GDPR regulation](https://www.eugdpr.org/)
 requires parts of the address, such as the street, to be encrypted. This uses the key & salt required for the config
@@ -52,20 +54,32 @@ To encrypt a street name, add `@Encrypted` like so:
      */
     protected $street;
     
-If you need make sure that encryption is done in a unique way, such as for passwords or keys, which need decryption
-(e.g. in the case that you need to create a connection string for an external API), you can provide some options. 
-Options provided are `spices`, `salt` and `pepper`. These must point to a property of the Entity you're encrypting, from
-which then either the Salt or the Pepper or both of them are gotten and used.
+By default the Encryption service assumes that the data to be encrypted is of the type `string`. However, you could have
+a requirement to encrypt another type of data, such as a house number. Non-string types are supported, but the type of data
+must be provided if not a string. You can do this like so:
+
+    /**
+     * @var int
+     * @ORM\Column(name="house_number", type="integer", length=20, nullable=false)
+     * @Encrypted(type="int")
+     */
+    protected $houseNumber;
+    
+Supported types are [found here](http://php.net/settype).
+
+### Hashing
+
+Say you'd like to store a password, it should work in much of the same way as the above. However, it is data that should
+not be de-cryptable (and there's no need for it to ever be decrypted), thus you should hash it instead.
+
+To hash something, like a password, add the `@Hashed` Annotation. See the example below.
 
     /**
      * @var string
-     * @ORM\Column(name="street", type="string", length=255, nullable=true)
-     * @Encrypted(spices="encryption")
+     * @ORM\Column(name="password", type="text", nullable=false)
+     * @Hashed
      */
-    protected $street;
+    protected $password;
     
-The above example expects a property `relation` to be present. The value is given for the option `spices`, as such, 
-the returned Entity when using `getEncryption` must implement the `SpicyInterface`.
-
-**NOTE**: The option `spices` *may not be used* in conjunction with either `salt` or `pepper`. If you're *not* using 
-`spices`, you may use both `salt` and `pepper`. 
+**Note** that, unlike `@Encrypted`, there aren't options to give a type. As we can't decrypt the data (it's one-way), 
+there's no need to know what the original type was. The response will always be string value. 

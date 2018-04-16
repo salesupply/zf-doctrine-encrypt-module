@@ -4,16 +4,16 @@ namespace ZfDoctrineEncryptModule\Factory;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use ZfDoctrineEncryptModule\Adapter\HaliteAdapter;
+use ZfDoctrineEncryptModule\Adapter\HaliteHashingAdapter;
 use ZfDoctrineEncryptModule\Exception\OptionsNotFoundException;
 
-class HaliteAdapterFactory implements FactoryInterface
+class HaliteHashingAdapterFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
      * @param string $requestedName
      * @param array|null $options
-     * @return object|HaliteAdapter
+     * @return HaliteHashingAdapter
      * @throws OptionsNotFoundException
      * @throws \ParagonIE\Halite\Alerts\InvalidKey
      * @throws \TypeError
@@ -22,7 +22,7 @@ class HaliteAdapterFactory implements FactoryInterface
     {
         if (!is_array($options) || empty($options)) {
 
-            throw new OptionsNotFoundException('Options required to be set in the config for HaliteAdapter are "key" and "salt".');
+            throw new OptionsNotFoundException('Options required to be set in the config for HaliteAdapter are "key".');
         }
 
         if (!key_exists('key', $options) && !is_string($options['key'])) {
@@ -30,11 +30,11 @@ class HaliteAdapterFactory implements FactoryInterface
             throw new OptionsNotFoundException('Option "key" is required.');
         }
 
-        if (!key_exists('salt', $options) && !is_string($options['salt'])) {
+        if (!key_exists('pepper', $options) && !is_string($options['pepper'])) {
 
-            throw new OptionsNotFoundException('Option "salt" is required.');
+            throw new OptionsNotFoundException('Option "pepper" is required.');
         }
 
-        return new HaliteAdapter($options['key'], $options['salt']);
+        return new HaliteHashingAdapter($options['key'], $options['pepper']);
     }
 }
