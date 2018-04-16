@@ -9,7 +9,7 @@ use DoctrineModule\Service\AbstractFactory;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZfDoctrineEncryptModule\Adapter\HaliteEncryptionAdapter;
-use ZfDoctrineEncryptModule\Options\ModuleOptions;
+use ZfDoctrineEncryptModule\Options\EncryptModuleOptions;
 use ZfDoctrineEncryptModule\Subscriber\DoctrineEncryptSubscriber;
 
 class ZfDoctrineEncryptedServiceFactory extends AbstractFactory
@@ -22,7 +22,7 @@ class ZfDoctrineEncryptedServiceFactory extends AbstractFactory
      */
     public function createService(ServiceLocatorInterface $container)
     {
-        /** @var ModuleOptions $options */
+        /** @var EncryptModuleOptions $options */
         $options = $this->getOptions($container, 'encryption');
 
         /** @var Reader|AnnotationReader $reader */
@@ -62,7 +62,7 @@ class ZfDoctrineEncryptedServiceFactory extends AbstractFactory
      */
     public function getOptionsClass()
     {
-        return ModuleOptions::class;
+        return EncryptModuleOptions::class;
     }
 
     /**

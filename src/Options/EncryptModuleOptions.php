@@ -6,7 +6,7 @@ use Doctrine\Common\Annotations\Reader;
 use DoctrineEncrypt\Encryptors\EncryptorInterface;
 use Zend\Stdlib\AbstractOptions;
 
-class ModuleOptions extends AbstractOptions
+class EncryptModuleOptions extends AbstractOptions
 {
     /**
      * @var Reader|string
@@ -24,11 +24,6 @@ class ModuleOptions extends AbstractOptions
     private $key;
 
     /**
-     * @var string
-     */
-    private $salt;
-
-    /**
      * @return Reader|string
      */
     public function getReader()
@@ -38,7 +33,7 @@ class ModuleOptions extends AbstractOptions
 
     /**
      * @param Reader|string $reader
-     * @return ModuleOptions
+     * @return EncryptModuleOptions
      */
     public function setReader($reader)
     {
@@ -56,7 +51,7 @@ class ModuleOptions extends AbstractOptions
 
     /**
      * @param EncryptorInterface|string $adapter
-     * @return ModuleOptions
+     * @return EncryptModuleOptions
      */
     public function setAdapter($adapter)
     {
@@ -74,30 +69,11 @@ class ModuleOptions extends AbstractOptions
 
     /**
      * @param string $key
-     * @return ModuleOptions
+     * @return EncryptModuleOptions
      */
-    public function setKey(string $key): ModuleOptions
+    public function setKey(string $key): EncryptModuleOptions
     {
         $this->key = $key;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getSalt(): string
-    {
-        return $this->salt;
-    }
-
-    /**
-     * @param string $salt
-     * @return ModuleOptions
-     */
-    public function setSalt(string $salt): ModuleOptions
-    {
-        $this->salt = $salt;
-        return $this;
-    }
-
 }
