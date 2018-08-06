@@ -37,7 +37,7 @@ If these are filled in, it works out of the box using [Halite](https://github.co
 However, must be said, at the moment of writing this ReadMe, the Halite module contains duplicate `const` declarations,
 as such, you must disable your `E_NOTICE` warnings in your PHP config :(
 
-# Examples
+## Annotation Examples
 
 ### Encryption
 
@@ -82,4 +82,33 @@ To hash something, like a password, add the `@Hashed` Annotation. See the exampl
     protected $password;
     
 **Note** that, unlike `@Encrypted`, there aren't options to give a type. As we can't decrypt the data (it's one-way), 
-there's no need to know what the original type was. The response will always be string value. 
+there's no need to know what the original type was. The response will always be string value.
+
+ ## Controller Examples
+ 
+ ### Hashing
+ 
+ A `Hashmanager` service is provided. This manager also uses the `HaliteHashingAdapter` but provides functionality that 
+ can be used in Controllers and other classes, such as plugins. The service is registered under the alias 'hashing_service'.
+ You can override 'hasing_service' in your own project to provide your own implementation. 
+ 
+ The `HashManager` provides the ability to hash and verify strings. These are two separate operations, one one-way 
+ hashes a string. The other does the same (requires the hashed string) and then verifies that both strings are 
+ exactly the same (thus verifying).
+ 
+ In a Controller, to hash a string, simple do:
+ 
+     $secret = $this->getHashManager()->hash('correct horse battery staple')
+     
+ To verify that your dealing the same string a next time, for example to compare passwords on login, do:
+ 
+     $verified = $this->getHashManager()->verify('correct horse battery staple', $secret)
+     
+ `$verified` will be set to a boolean value. 
+ 
+ To not store any entered data longer than you must, you could compare directly from form data, like so:
+ 
+     if($form->isValid() && $this->getHashManager()->verify($form->getData()['password_field'], $user->getPassword()) {
+         // do other things
+     }
+     

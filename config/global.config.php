@@ -7,8 +7,10 @@ use ZfDoctrineEncryptModule\Adapter\HaliteEncryptionAdapter;
 use ZfDoctrineEncryptModule\Adapter\HaliteHashingAdapter;
 use ZfDoctrineEncryptModule\Factory\HaliteEncryptionAdapterFactory;
 use ZfDoctrineEncryptModule\Factory\HaliteHashingAdapterFactory;
+use ZfDoctrineEncryptModule\Factory\Service\HashManagerFactory;
 use ZfDoctrineEncryptModule\Factory\ZfDoctrineEncryptedServiceFactory;
 use ZfDoctrineEncryptModule\Factory\ZfDoctrineHashedServiceFactory;
+use ZfDoctrineEncryptModule\Service\HashManager;
 
 return [
     'doctrine_factories' => [
@@ -41,11 +43,13 @@ return [
         'aliases' => [
             'encryption_adapter' => HaliteEncryptionAdapter::class,
             'hashing_adapter' => HaliteHashingAdapter::class,
+            'hashing_service' => HashManager::class,
         ],
         'factories' => [
             // Using aliases so someone else can use own adapter/factory
             HaliteEncryptionAdapter::class => HaliteEncryptionAdapterFactory::class,
             HaliteHashingAdapter::class => HaliteHashingAdapterFactory::class,
+            HashManager::class => HashManagerFactory::class,
         ],
     ],
 ];
