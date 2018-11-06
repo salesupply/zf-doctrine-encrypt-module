@@ -1,6 +1,6 @@
 {
-  "name": "salesupply/zf-doctrine-encrypt-module",
-  "description": "Provides property encryption for Doctrine Entities when used within Zend Framework 3.",
+  "name": "gabrovex/zf-doctrine-encrypt-module",
+  "description": "Fork of salesupply/zf-doctrine-encrypt-module. Provides property encryption for Doctrine Entities when used within Zend Framework 3.",
   "keywords": ["zf3", "doctrine2", "encrypt", "module", "zend framework 3", "encryption"],
   "homepage": "https://www.salesupply.com/",
   "license" : "MIT",
