@@ -17,7 +17,7 @@
   "require": {
     "php": "^7.2",
     "51systems/doctrine-encrypt":"^6",
-    "doctrine/doctrine-orm-module":"^2.1",
+    "doctrine/doctrine-orm-module":"^1.1 || ^2.1",
     "paragonie/halite": "^4.4"
   },
   "autoload": {
