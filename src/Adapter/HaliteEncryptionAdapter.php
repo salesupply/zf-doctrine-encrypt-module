@@ -31,7 +31,7 @@ class HaliteEncryptionAdapter implements EncryptorInterface
             );
         }
 
-        $this->setKey((new EncryptionKey((new HiddenString($key)))));
+        $this->setKey(new EncryptionKey(new HiddenString($key)));
     }
 
     /**
@@ -42,21 +42,22 @@ class HaliteEncryptionAdapter implements EncryptorInterface
      * @throws \ParagonIE\Halite\Alerts\InvalidMessage
      * @throws \ParagonIE\Halite\Alerts\InvalidType
      */
-    public function encrypt($data)
+    public function encrypt($data): string
     {
         return Crypto::encrypt(new HiddenString($data), $this->getKey());
     }
 
     /**
      * @param string $data
-     * @return HiddenString|string
+     *
+     * @return HiddenString
      * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
      * @throws \ParagonIE\Halite\Alerts\InvalidDigestLength
      * @throws \ParagonIE\Halite\Alerts\InvalidMessage
      * @throws \ParagonIE\Halite\Alerts\InvalidSignature
      * @throws \ParagonIE\Halite\Alerts\InvalidType
      */
-    public function decrypt($data)
+    public function decrypt($data): HiddenString
     {
         return Crypto::decrypt($data, $this->getKey());
     }
